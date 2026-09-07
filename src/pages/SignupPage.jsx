@@ -13,13 +13,19 @@ const SignupPage = () => {
   const [errorMsg, setErrorMsg] = useState("");
 
   const handleGoogleSignup = async () => {
+    // Important: Clear previous error first
     setErrorMsg("");
-    setLoading(true);
+
     try {
+      // 1. Call signInWithPopup as early as possible (preserves user gesture)
       const result = await signInWithPopup(auth, googleProvider);
+
+      // Only set loading after popup is successfully opened
+      setLoading(true);
+
       const user = result.user;
       const token = await user.getIdToken();
-      
+
       const userData = {
         uid: user.uid,
         name: user.displayName || "User",
@@ -32,8 +38,27 @@ const SignupPage = () => {
       navigate("/");
     } catch (err) {
       console.error("Firebase Google Sign-In error", err);
-      if (err.code !== "auth/popup-closed-by-user") {
-        setErrorMsg(err.message || "Sign in with Google failed. Please try again.");
+
+      // Better error handling
+      switch (err.code) {
+        case "auth/popup-closed-by-user":
+          // User closed the popup → no need to show error
+          break;
+        case "auth/popup-blocked":
+          setErrorMsg(
+            "Popup was blocked by the browser. Please allow popups for this site and try again.",
+          );
+          break;
+        case "auth/cancelled-popup-request":
+          // Multiple clicks → ignore
+          break;
+        case "auth/network-request-failed":
+          setErrorMsg("Network error. Please check your internet connection.");
+          break;
+        default:
+          setErrorMsg(
+            err.message || "Sign in with Google failed. Please try again.",
+          );
       }
     } finally {
       setLoading(false);
@@ -124,7 +149,8 @@ const SignupPage = () => {
 
             {/* Description */}
             <p className="text-sm sm:text-base text-zinc-500 dark:text-zinc-400 mt-2.5 mb-7 leading-relaxed max-w-sm">
-              Join Pixora instantly to explore, save collections, and download free stock media.
+              Join Pixora instantly to explore, save collections, and download
+              free stock media.
             </p>
 
             {/* Error Message if any */}
