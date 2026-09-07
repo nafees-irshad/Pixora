@@ -177,7 +177,11 @@ const ResultGrid = () => {
     );
   }
 
-  const visiblePages = [1, 2, 3];
+  const pageGroupStart = page < 3 ? 1 : Math.floor(page / 3) * 3 + 1;
+  const visiblePages = Array.from(
+    { length: Math.min(3, MAX_PAGE - pageGroupStart + 1) },
+    (_, index) => pageGroupStart + index,
+  );
 
   return (
     <div className="w-full max-w-7xl px-4 flex flex-col items-center gap-8 mt-6">
@@ -234,9 +238,11 @@ const ResultGrid = () => {
               </button>
             );
           })}
-          <span className="w-9 h-9 flex items-center justify-center text-sm font-semibold text-gray-500 dark:text-zinc-500">
-            ...
-          </span>
+          {pageGroupStart + visiblePages.length - 1 < MAX_PAGE && (
+            <span className="w-9 h-9 flex items-center justify-center text-sm font-semibold text-gray-500 dark:text-zinc-500">
+              ...
+            </span>
+          )}
         </div>
 
         {/* Next Button */}
