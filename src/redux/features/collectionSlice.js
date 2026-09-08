@@ -18,6 +18,7 @@ const getCurrentUserId = () => {
     const userStr = localStorage.getItem("pixora_user");
     if (userStr) {
       const u = JSON.parse(userStr);
+      // console.log(u.uid)
       return u?.uid || null;
     }
   } catch {
@@ -29,6 +30,7 @@ const getCurrentUserId = () => {
 const loadSavedCollections = (specificUid) => {
   try {
     const uid = specificUid !== undefined ? specificUid : getCurrentUserId();
+    // console.log(uid)
     if (!uid) {
       return [];
     }
@@ -85,7 +87,7 @@ const saveCollectionsToCloud = async (uid, collections) => {
       },
       { merge: true },
     );
-    console.log("Collections saved to Firestore successfully");
+    // console.log("Collections saved to Firestore successfully");
   } catch (error) {
     console.error("Failed to save collections to Firestore:", error);
   }
@@ -261,6 +263,21 @@ const collectionSlice = createSlice({
       let targetCol = state.collections.find((c) => c.id === targetColId);
       if (!targetCol) {
         targetCol = state.collections[0];
+      }
+
+      // Safety fallback: if collections is still empty (e.g. Firestore snapshot
+      // hasn't arrived yet or auth just initialized), auto-create the default
+      // Favorites collection so Save always works, never silently fails.
+      if (!targetCol) {
+        const defaultCol = {
+          id: DEFAULT_COLLECTION_ID,
+          name: "Favorites",
+          createdAt: Date.now(),
+          items: [],
+        };
+        state.collections.push(defaultCol);
+        state.activeCollectionId = DEFAULT_COLLECTION_ID;
+        targetCol = defaultCol;
       }
 
       if (targetCol) {

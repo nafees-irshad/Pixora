@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleCollection } from "../redux/features/collectionSlice";
 import AddToCollectionModal from "./addToCollectionModal";
@@ -9,7 +9,6 @@ const MediaModal = ({ item, onClose }) => {
   const isSaved = item ? savedItems.some((i) => i.id === item.id) : false;
 
   const [downloading, setDownloading] = useState(false);
-  const [likeCount, setLikeCount] = useState(() => Math.floor(Math.random() * 80) + 12);
   const [copied, setCopied] = useState(false);
   const [isCollectionModalOpen, setIsCollectionModalOpen] = useState(false);
 
@@ -60,7 +59,6 @@ const MediaModal = ({ item, onClose }) => {
 
   const handleToggleLike = () => {
     dispatch(toggleCollection(item));
-    setLikeCount((prev) => (isSaved ? prev - 1 : prev + 1));
   };
 
   const handleShare = () => {
@@ -111,7 +109,7 @@ const MediaModal = ({ item, onClose }) => {
             {/* Like / Collection Button */}
             <button
               onClick={handleToggleLike}
-              title={isSaved ? "Remove like" : "Like"}
+              title={isSaved ? "Remove from favorites" : "Save to favorites"}
               className={`px-3.5 py-2 rounded-full border text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 cursor-pointer ${
                 isSaved
                   ? "bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-900 text-rose-600 dark:text-rose-400 scale-105"
@@ -130,7 +128,7 @@ const MediaModal = ({ item, onClose }) => {
                   d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
                 />
               </svg>
-              <span>{likeCount}</span>
+              <span>{isSaved ? "Saved" : "Save"}</span>
             </button>
 
             {/* Add to Collection Button */}

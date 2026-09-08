@@ -40,11 +40,14 @@ function App() {
           dispatch,
         );
       } else {
-        // No authenticated Firebase session — clear state so guest users start fresh.
-        // Note: Firebase persists sessions in IndexedDB, so onAuthStateChanged will
-        // always resolve to a firebaseUser on reload if the user was previously logged in.
-        // Reaching this branch genuinely means the user is logged out.
-        dispatch(resetCollections());
+        // Guard against Firebase's brief null state during auth initialization.
+        // Firebase can fire onAuthStateChanged with null while it reads its
+        // persistence store, before resolving to the actual logged-in user.
+        // Only reset collections if there's genuinely no stored session.
+        const hasLocalUser = localStorage.getItem("pixora_user");
+        if (!hasLocalUser) {
+          dispatch(resetCollections());
+        }
       }
     });
 
