@@ -100,6 +100,13 @@ export const subscribeToUserCollections = (uid, dispatch) => {
   return onSnapshot(
     docRef,
     async (snapshot) => {
+      // Skip stale Firestore IndexedDB cache snapshots — only trust server data.
+      // fromCache=true with no pending writes means this is old cached data, not
+      // the live state, so dispatching it could overwrite fresher local changes.
+      if (snapshot.metadata.fromCache && !snapshot.metadata.hasPendingWrites) {
+        return;
+      }
+
       const remoteCollections = snapshot.data()?.collections;
 
       if (Array.isArray(remoteCollections)) {
@@ -188,9 +195,12 @@ const collectionSlice = createSlice({
         ).values(),
       );
       saveCollectionsToStorage(state.collections);
+      // Serialize out of Immer draft proxy before passing to async Firestore write.
+      // Passing the raw draft directly causes setDoc to silently write empty data.
+      const plainCollections = JSON.parse(JSON.stringify(state.collections));
       void saveCollectionsToCloud(
         auth.currentUser?.uid || getCurrentUserId(),
-        state.collections,
+        plainCollections,
       );
     },
     addToCollection: (state, action) => {
@@ -210,9 +220,10 @@ const collectionSlice = createSlice({
         ).values(),
       );
       saveCollectionsToStorage(state.collections);
+      const plainCollections = JSON.parse(JSON.stringify(state.collections));
       void saveCollectionsToCloud(
         auth.currentUser?.uid || getCurrentUserId(),
-        state.collections,
+        plainCollections,
       );
     },
     deleteCollection: (state, action) => {
@@ -231,9 +242,10 @@ const collectionSlice = createSlice({
         ).values(),
       );
       saveCollectionsToStorage(state.collections);
+      const plainCollections = JSON.parse(JSON.stringify(state.collections));
       void saveCollectionsToCloud(
         auth.currentUser?.uid || getCurrentUserId(),
-        state.collections,
+        plainCollections,
       );
     },
     setActiveCollection: (state, action) => {
@@ -266,9 +278,10 @@ const collectionSlice = createSlice({
         ).values(),
       );
       saveCollectionsToStorage(state.collections);
+      const plainCollections = JSON.parse(JSON.stringify(state.collections));
       void saveCollectionsToCloud(
         auth.currentUser?.uid || getCurrentUserId(),
-        state.collections,
+        plainCollections,
       );
     },
     removeFromCollection: (state, action) => {
@@ -291,9 +304,10 @@ const collectionSlice = createSlice({
         ).values(),
       );
       saveCollectionsToStorage(state.collections);
+      const plainCollections = JSON.parse(JSON.stringify(state.collections));
       void saveCollectionsToCloud(
         auth.currentUser?.uid || getCurrentUserId(),
-        state.collections,
+        plainCollections,
       );
     },
     clearCollection: (state, action) => {
@@ -308,9 +322,10 @@ const collectionSlice = createSlice({
         ).values(),
       );
       saveCollectionsToStorage(state.collections);
+      const plainCollections = JSON.parse(JSON.stringify(state.collections));
       void saveCollectionsToCloud(
         auth.currentUser?.uid || getCurrentUserId(),
-        state.collections,
+        plainCollections,
       );
     },
   },

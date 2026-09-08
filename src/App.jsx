@@ -20,6 +20,7 @@ function App() {
     let unsubscribeCollections = () => {};
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      // Always tear down the previous Firestore listener before setting up a new one.
       unsubscribeCollections();
 
       if (firebaseUser) {
@@ -31,15 +32,19 @@ function App() {
           picture: firebaseUser.photoURL,
         };
         dispatch(setUser({ user: userData, token }));
+        // Subscribe to Firestore — this is what drives cross-browser real-time sync.
+        // onSnapshot will immediately fire with the latest server state, keeping all
+        // browser tabs and devices in sync whenever collections are mutated.
         unsubscribeCollections = subscribeToUserCollections(
           firebaseUser.uid,
           dispatch,
         );
       } else {
-        const hasLocalUser = localStorage.getItem("pixora_user");
-        if (!hasLocalUser) {
-          dispatch(resetCollections());
-        }
+        // No authenticated Firebase session — clear state so guest users start fresh.
+        // Note: Firebase persists sessions in IndexedDB, so onAuthStateChanged will
+        // always resolve to a firebaseUser on reload if the user was previously logged in.
+        // Reaching this branch genuinely means the user is logged out.
+        dispatch(resetCollections());
       }
     });
 
