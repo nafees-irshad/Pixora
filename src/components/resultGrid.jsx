@@ -19,7 +19,7 @@ const extractUrl = (val) => {
   return val.url || "";
 };
 
-function MediaFeed({ query, activeTab }) {
+function MediaFeed({ query, activeTab, onFeaturedItems }) {
   const [items, setItems] = useState([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -146,10 +146,18 @@ function MediaFeed({ query, activeTab }) {
     return () => observer.disconnect();
   }, [loading, hasMore, error]);
 
+  useEffect(() => {
+    if (isHome && onFeaturedItems) {
+      onFeaturedItems(items.slice(0, 2));
+    }
+  }, [isHome, items, onFeaturedItems]);
+
+  const visibleItems = isHome && onFeaturedItems ? items.slice(2) : items;
+
   return (
     <div className="w-full max-w-7xl px-4 flex flex-col items-center gap-8 mt-6">
       <div className="w-full columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4">
-        {items.map((item) => (
+        {visibleItems.map((item) => (
           <ResultCard
             key={`${item.type}:${item.id}`}
             item={item}
@@ -195,7 +203,7 @@ function MediaFeed({ query, activeTab }) {
   );
 }
 
-export default function ResultGrid() {
+export default function ResultGrid({ onFeaturedItems }) {
   const { query, activeTab } = useSelector((store) => store.search);
   return (
     <MediaFeed
@@ -205,6 +213,7 @@ export default function ResultGrid() {
       ])}
       query={query}
       activeTab={activeTab}
+      onFeaturedItems={onFeaturedItems}
     />
   );
 }

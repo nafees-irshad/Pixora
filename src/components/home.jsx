@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Logo from "./logo";
@@ -12,28 +12,12 @@ const HomePage = () => {
   const { query, activeTab } = useSelector((store) => store.search);
   const hasSearchQuery = Boolean(query?.trim());
   const [searchText, setSearchText] = useState(query || "");
-  const [isSearchInNavbar, setIsSearchInNavbar] = useState(false);
-  const heroSearchRef = useRef(null);
+  const [featuredItems, setFeaturedItems] = useState([]);
   const favoriteCount = useSelector(
     (store) => store.collection?.items?.length || 0,
   );
 
-  useEffect(() => {
-    const searchElement = heroSearchRef.current;
-    if (!searchElement || hasSearchQuery) return undefined;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsSearchInNavbar(!entry.isIntersecting),
-      { threshold: 0 },
-    );
-
-    observer.observe(searchElement);
-    return () => observer.disconnect();
-  }, [hasSearchQuery]);
-
-  const showNavbarSearch = hasSearchQuery || isSearchInNavbar;
-
-  // Format dynamic title (e.g. "Free Stock Images", "Free Stock Videos", "Cat Images")
+  // Format dynamic title for search results.
   const getDisplayTitle = () => {
     const tabLabel =
       activeTab.toLowerCase() === "photos"
@@ -61,11 +45,9 @@ const HomePage = () => {
         {/* Brand Logo */}
         <Logo />
 
-        {showNavbarSearch && (
-          <div className="order-3 basis-full min-w-0 md:order-none md:basis-auto md:flex-1 md:max-w-2xl">
-            <SearchBar value={searchText} onChange={setSearchText} />
-          </div>
-        )}
+        <div className="order-3 basis-full min-w-0 md:order-none md:basis-auto md:flex-1 md:max-w-2xl">
+          <SearchBar value={searchText} onChange={setSearchText} />
+        </div>
 
         {/* Right Controls: Theme Toggle + Profile */}
         <div className="flex items-center gap-3 shrink-0 ml-auto">
@@ -98,26 +80,58 @@ const HomePage = () => {
         </div>
       </header>
 
-      {/* Hero Section: Centered H1 Heading -> Search Bar -> Tabs */}
-      <section className="w-full max-w-4xl mx-auto px-4 pt-6 pb-8 flex flex-col items-center text-center gap-6 z-20 relative">
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-gabarito font-normal tracking-tight text-zinc-900 dark:text-white">
-          {getDisplayTitle()}
-        </h1>
-
-        {!hasSearchQuery && (
-          <div
-            ref={heroSearchRef}
-            className={`w-full max-w-2xl ${isSearchInNavbar ? "invisible" : ""}`}
-          >
-            <SearchBar value={searchText} onChange={setSearchText} />
+      {!hasSearchQuery ? (
+        <section className="w-full max-w-7xl px-4 sm:px-8 py-8 sm:py-12 lg:py-16 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+          <div className="lg:col-span-6">
+            <h2 className="max-w-3xl text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-gabarito font-normal leading-[1.04] tracking-tight text-zinc-950 dark:text-white">
+              The best free stock photos, royalty free images &amp; videos shared by creators.
+            </h2>
           </div>
-        )}
+          <div className="lg:col-span-6 grid grid-cols-2 gap-3 sm:gap-4">
+            {[0, 1].map((index) => {
+              const item = featuredItems[index];
+              const image = item?.thumbnail || item?.src;
 
-      </section>
+              return (
+                <div
+                  key={item?.id || `featured-placeholder-${index}`}
+                  className="relative aspect-[4/5] overflow-hidden rounded-3xl bg-zinc-100 dark:bg-zinc-900"
+                >
+                  {image ? (
+                    <img
+                      src={image}
+                      alt={item.title || "Free stock photo"}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="h-full w-full animate-pulse bg-zinc-200 dark:bg-zinc-800" />
+                  )}
+                  {item && (
+                    <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/70 via-black/10 to-transparent p-3 sm:p-5">
+                      <p className="line-clamp-2 text-sm sm:text-base font-semibold text-white">
+                        {item.title}
+                      </p>
+                      <p className="mt-1 text-xs sm:text-sm text-white/80">
+                        {item.author}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      ) : (
+        <section className="w-full max-w-7xl px-4 sm:px-8 pt-8 pb-2">
+          <h1 className="text-3xl sm:text-4xl font-gabarito font-normal tracking-tight text-zinc-900 dark:text-white">
+            {getDisplayTitle()}
+          </h1>
+        </section>
+      )}
 
       {/* Media Results Grid */}
       <main className="w-full max-w-7xl px-4 sm:px-8 pb-16 flex flex-col items-center relative z-10">
-        <ResultGrid />
+        <ResultGrid onFeaturedItems={setFeaturedItems} />
       </main>
 
       <footer className="w-full mt-auto border-t border-zinc-200/80 dark:border-zinc-800/80 px-4 sm:px-8 py-6 text-center">

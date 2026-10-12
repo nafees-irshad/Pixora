@@ -18,17 +18,25 @@ export async function fetchPhotos(query, page = 1, per_page = 20) {
 }
 
 export async function fetchVideos(query, page = 1, per_page = 20) {
-  const res = await axios.get("https://api.pexels.com/v1/videos/search", {
-    params: {
-      query,
-      page,
-      per_page,
-    },
+  const response = await axios.get("https://api.pexels.com/v1/videos/search", {
+    params: { query, page, per_page },
     headers: {
       Authorization: PEXELS_KEY,
     },
   });
-  return res.data;
+
+  return response.data;
+}
+
+export async function fetchPopularVideos(page = 1, per_page = 20) {
+  const response = await axios.get("https://api.pexels.com/v1/videos/popular", {
+    params: { page, per_page },
+    headers: {
+      Authorization: PEXELS_KEY,
+    },
+  });
+
+  return response.data;
 }
 
 export async function fetchGifs(query, page = 1, per_page = 20) {
@@ -53,14 +61,6 @@ export async function fetchRandomPhotos(count = 20) {
   const res = await axios.get("https://api.unsplash.com/photos/random", {
     params: { count },
     headers: { Authorization: `Client-ID ${UNSPLASH_KEY}` },
-  });
-  return res.data;
-}
-
-export async function fetchPopularVideos(page = 1, per_page = 20) {
-  const res = await axios.get("https://api.pexels.com/videos/search", {
-    params: { page, per_page },
-    headers: { Authorization: PEXELS_KEY },
   });
   return res.data;
 }
