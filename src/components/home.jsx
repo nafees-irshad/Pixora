@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Logo from "./logo";
@@ -10,9 +11,27 @@ const HomePage = () => {
   const user = useSelector((store) => store.auth?.user);
   const { query, activeTab } = useSelector((store) => store.search);
   const hasSearchQuery = Boolean(query?.trim());
+  const [searchText, setSearchText] = useState(query || "");
+  const [isSearchInNavbar, setIsSearchInNavbar] = useState(false);
+  const heroSearchRef = useRef(null);
   const favoriteCount = useSelector(
     (store) => store.collection?.items?.length || 0,
   );
+
+  useEffect(() => {
+    const searchElement = heroSearchRef.current;
+    if (!searchElement || hasSearchQuery) return undefined;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsSearchInNavbar(!entry.isIntersecting),
+      { threshold: 0 },
+    );
+
+    observer.observe(searchElement);
+    return () => observer.disconnect();
+  }, [hasSearchQuery]);
+
+  const showNavbarSearch = hasSearchQuery || isSearchInNavbar;
 
   // Format dynamic title (e.g. "Free Stock Images", "Free Stock Videos", "Cat Images")
   const getDisplayTitle = () => {
@@ -42,9 +61,9 @@ const HomePage = () => {
         {/* Brand Logo */}
         <Logo />
 
-        {hasSearchQuery && (
+        {showNavbarSearch && (
           <div className="order-3 basis-full min-w-0 md:order-none md:basis-auto md:flex-1 md:max-w-2xl">
-            <SearchBar />
+            <SearchBar value={searchText} onChange={setSearchText} />
           </div>
         )}
 
@@ -86,8 +105,11 @@ const HomePage = () => {
         </h1>
 
         {!hasSearchQuery && (
-          <div className="w-full max-w-2xl">
-            <SearchBar />
+          <div
+            ref={heroSearchRef}
+            className={`w-full max-w-2xl ${isSearchInNavbar ? "invisible" : ""}`}
+          >
+            <SearchBar value={searchText} onChange={setSearchText} />
           </div>
         )}
 

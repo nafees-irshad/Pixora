@@ -52,21 +52,15 @@ export async function fetchGifs(query, page = 1, per_page = 20) {
 export async function fetchRandomPhotos(count = 20) {
   const res = await axios.get("https://api.unsplash.com/photos/random", {
     params: { count },
-    headers: {
-      Authorization: `Client-ID ${UNSPLASH_KEY}`,
-    },
+    headers: { Authorization: `Client-ID ${UNSPLASH_KEY}` },
   });
-
   return res.data;
 }
 
 export async function fetchPopularVideos(page = 1, per_page = 20) {
-  const res = await axios.get("https://api.pexels.com/videos/popular", {
+  const res = await axios.get("https://api.pexels.com/videos/search", {
     params: { page, per_page },
-    headers: {
-      Authorization: PEXELS_KEY,
-    },
+    headers: { Authorization: PEXELS_KEY },
   });
-
   return res.data;
 }

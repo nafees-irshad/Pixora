@@ -2,11 +2,9 @@ import { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setActiveTabs, setQuery } from "../redux/features/searchSlice";
 
-const SearchBar = () => {
+const SearchBar = ({ value, onChange }) => {
     const dispatch = useDispatch();
-    const currentQuery = useSelector((store) => store.search?.query || "");
     const activeTab = useSelector((store) => store.search?.activeTab || "photos");
-    const [text, setText] = useState(currentQuery);
     const [isMediaMenuOpen, setIsMediaMenuOpen] = useState(false);
     const mediaMenuRef = useRef(null);
     const mediaTypes = [
@@ -41,13 +39,13 @@ const SearchBar = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const submittedQuery = text.trim();
-        setText(submittedQuery);
+        const submittedQuery = value.trim();
+        onChange(submittedQuery);
         dispatch(setQuery(submittedQuery));
     };
 
     const handleClear = () => {
-        setText("");
+        onChange("");
         dispatch(setQuery(""));
     };
 
@@ -101,14 +99,14 @@ const SearchBar = () => {
             {/* Search Input */}
             <input
                 type="text"
-                value={text}
-                onChange={(e) => setText(e.target.value)}
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
                 placeholder="Search free photos, videos & GIFs..."
                 className="min-w-0 flex-1 bg-transparent px-3 text-sm sm:text-base text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 outline-none"
             />
 
             {/* Clear Button (if text exists) */}
-            {text && (
+            {value && (
                 <button
                     type="button"
                     onClick={handleClear}
