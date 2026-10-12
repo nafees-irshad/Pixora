@@ -1,4 +1,5 @@
- import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleCollection } from "../redux/features/collectionSlice";
 import AddToCollectionModal from "./addToCollectionModal";
@@ -69,9 +70,9 @@ const MediaModal = ({ item, onClose }) => {
     }
   };
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate-fadeIn"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate-fadeIn"
       onClick={onClose}
     >
       {/* Modal Container */}
@@ -79,8 +80,18 @@ const MediaModal = ({ item, onClose }) => {
         onClick={(e) => e.stopPropagation()}
         className="relative w-full max-w-4xl max-h-[92vh] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-2xl overflow-y-auto flex flex-col transition-all duration-300"
       >
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close modal"
+          className="absolute top-3 right-3 z-30 p-2 rounded-full bg-white/90 dark:bg-zinc-800/90 hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white shadow-sm transition-colors cursor-pointer"
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
         {/* Modal Header */}
-        <div className="sticky top-0 z-20 flex items-center justify-between px-6 py-4 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-b border-zinc-100 dark:border-zinc-800/80">
+        <div className="sticky top-0 z-20 flex items-center justify-between px-6 pr-16 py-4 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-b border-zinc-100 dark:border-zinc-800/80">
           {/* Creator Profile */}
           <div className="flex items-center gap-3">
             {item.authorAvatar ? (
@@ -195,17 +206,6 @@ const MediaModal = ({ item, onClose }) => {
                 </>
               )}
             </button>
-
-            {/* Close Button */}
-            <button
-              onClick={onClose}
-              aria-label="Close modal"
-              className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer ml-1"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
           </div>
         </div>
 
@@ -280,7 +280,8 @@ const MediaModal = ({ item, onClose }) => {
         isOpen={isCollectionModalOpen}
         onClose={() => setIsCollectionModalOpen(false)}
       />
-    </div>
+    </div>,
+    document.body,
   );
 };
 

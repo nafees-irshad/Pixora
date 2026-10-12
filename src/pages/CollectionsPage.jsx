@@ -123,7 +123,7 @@ const CollectionsPage = () => {
   const quickSuggestions = ["Wallpapers", "Nature 4K", "Architecture", "Minimalist", "Aesthetic"];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0c0c0e] text-zinc-900 dark:text-white flex flex-col items-center transition-colors duration-300 font-outfit relative overflow-x-hidden">
+    <div className="min-h-screen bg-white dark:bg-[#0c0c0e] text-zinc-900 dark:text-white flex flex-col items-center transition-colors duration-300 font-outfit relative overflow-x-clip">
       {/* Background Subtle Glow Orbs */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden -z-0">
         <div
@@ -137,7 +137,7 @@ const CollectionsPage = () => {
       </div>
 
       {/* Top Navigation Bar */}
-      <header className="w-full max-w-7xl px-4 sm:px-8 py-5 flex items-center justify-between z-30 relative">
+      <header className="w-full max-w-7xl px-4 sm:px-8 py-5 flex items-center justify-between z-30 sticky top-0 bg-white/95 dark:bg-[#0c0c0e]/95 backdrop-blur-sm">
         <Link to="/" className="flex items-center gap-2.5 group select-none shrink-0">
           <img
             src="https://ik.imagekit.io/jk9e7l2uo/ChatGPT%20Image%20Sep%205,%202026,%2012_45_04%20AM.png"

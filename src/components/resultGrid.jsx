@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { fetchPhotos, fetchVideos, fetchGifs } from "../api/media.api";
+import {
+  fetchPhotos,
+  fetchVideos,
+  fetchGifs,
+  fetchRandomPhotos,
+  fetchPopularVideos,
+} from "../api/media.api";
 import {
   setActiveTabs,
   setResults,
@@ -25,14 +31,21 @@ const ResultGrid = () => {
     const getData = async () => {
       try {
         dispatch(setLoading());
+        const isHome = !query?.trim();
         const searchTerm = query?.trim() || "trending";
+
         let data = [];
 
         const currentTab = (activeTab || "photos").toLowerCase();
 
         if (currentTab === "photos") {
-          let response = await fetchPhotos(searchTerm, page, 20);
-          data = (response.results || []).map((item) => ({
+          const response = isHome
+            ? await fetchRandomPhotos(20)
+            : await fetchPhotos(searchTerm, page, 20);
+
+          const photos = isHome ? response : response.results || [];
+
+          data = photos.map((item) => ({
             id: item.id,
             type: "photo",
             title: item.alt_description || item.description || "Unsplash Photo",
@@ -44,7 +57,14 @@ const ResultGrid = () => {
         }
 
         if (currentTab === "videos") {
-          let response = await fetchVideos(searchTerm, page, 20);
+          let response;
+
+          if (isHome) {
+            const randomPage = Math.floor(Math.random() * 10) + 1;
+            response = await fetchPopularVideos(randomPage, 20);
+          } else {
+            response = await fetchVideos(searchTerm, page, 20);
+          }
           data = (response.videos || []).map((item) => {
             const videoFile =
               item.video_files?.find((f) => f.quality === "hd") ||
